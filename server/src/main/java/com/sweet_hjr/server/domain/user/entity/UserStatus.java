@@ -1,2 +1,7 @@
-package com.sweet_hjr.server.domain.user.entity;public enum UserStatus {
+package com.sweet_hjr.server.domain.user.entity;
+
+public enum UserStatus {
+    ACTIVE,
+    INACTIVE,
+    BLOCKED
 }
