@@ -19,6 +19,8 @@ export default function Header() {
     router.refresh();
   };
 
+  const isAdmin = isLoggedIn && user?.role === "ADMIN";
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -44,6 +46,15 @@ export default function Header() {
               My Uploads
             </Link>
           )}
+
+          {isAdmin && (
+            <Link
+              href="/admin/projects"
+              className="transition hover:text-slate-600"
+            >
+              포토북 관리
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -52,6 +63,15 @@ export default function Header() {
               <div className="hidden text-sm text-slate-500 md:block">
                 {user?.nickname} ({user?.role})
               </div>
+
+              {isAdmin && (
+                <Link
+                  href="/admin/projects"
+                  className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-50"
+                >
+                  관리자 페이지
+                </Link>
+              )}
 
               <Link
                 href="/my/uploads"

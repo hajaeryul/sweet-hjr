@@ -29,5 +29,9 @@ app:
   upload:
     base-dir: C:/jaeryul/sweet-hjr/bookprintapi-nodejs-sdk/server/uploads
 
+sweetbook:
+  base-url: https://api-sandbox.sweetbook.com/v1
+  api-key: "SBOCDAPTS9O7.6MzuQNHbk4Z_do8wfjIE1RYAYAniPQfE"
+
 server:
   port: 8080
