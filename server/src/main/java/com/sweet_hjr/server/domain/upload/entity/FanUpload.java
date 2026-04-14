@@ -41,4 +41,8 @@ public class FanUpload extends BaseEntity {
         this.status = status;
         this.memo = memo;
     }
+
+    public void changeStatus(UploadStatus status) {
+        this.status = status;
+    }
 }

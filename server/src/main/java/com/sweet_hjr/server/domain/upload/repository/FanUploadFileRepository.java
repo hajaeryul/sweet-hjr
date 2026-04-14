@@ -15,4 +15,7 @@ public interface FanUploadFileRepository extends JpaRepository<FanUploadFile, Lo
 
     @EntityGraph(attributePaths = {"fanUpload", "user"})
     List<FanUploadFile> findAllByFanUploadIdInOrderByUploadedAtDesc(List<Long> fanUploadIds);
+
+    @EntityGraph(attributePaths = {"fanUpload", "user", "project"})
+    List<FanUploadFile> findAllByFanUploadId(Long fanUploadId);
 }

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { createFanUpload } from "@/features/upload/api/createFanUpload";
 import { uploadFiles } from "@/features/upload/api/uploadFiles";
 import { completeFanUpload } from "@/features/upload/api/completeFanUpload";
@@ -14,9 +15,7 @@ type PageProps = {
 
 export default function UploadPage({ params }: PageProps) {
   const projectId = params.projectId;
-
-  // 지금은 인증이 없으니 임시 userId=1
-  const userId = 1;
+  const { isLoggedIn, user } = useAuth();
 
   const [memo, setMemo] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -33,18 +32,29 @@ export default function UploadPage({ params }: PageProps) {
     }));
   }, [selectedFiles]);
 
+  useEffect(() => {
+    return () => {
+      previews.forEach(({ previewUrl }) => URL.revokeObjectURL(previewUrl));
+    };
+  }, [previews]);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     setSelectedFiles(files);
   };
 
   const handleCreateSession = async () => {
+    if (!isLoggedIn || !user) {
+      setMessage("로그인 후 업로드할 수 있습니다.");
+      return;
+    }
+
     try {
       setIsCreatingSession(true);
       setMessage("");
 
       const result = await createFanUpload(projectId, {
-        userId,
+        userId: user.id,
         memo,
       });
 
@@ -59,6 +69,11 @@ export default function UploadPage({ params }: PageProps) {
   };
 
   const handleUploadFiles = async () => {
+    if (!isLoggedIn || !user) {
+      setMessage("로그인 후 업로드할 수 있습니다.");
+      return;
+    }
+
     if (!fanUploadId) {
       setMessage("먼저 업로드 세션을 생성해 주세요.");
       return;
@@ -73,7 +88,13 @@ export default function UploadPage({ params }: PageProps) {
       setIsUploading(true);
       setMessage("");
 
-      const result = await uploadFiles(projectId, fanUploadId, userId, selectedFiles);
+      const result = await uploadFiles(
+        projectId,
+        fanUploadId,
+        user.id,
+        selectedFiles
+      );
+
       setMessage(`${result.uploadedCount}개 파일 업로드가 완료되었습니다.`);
     } catch (error) {
       console.error(error);
@@ -84,6 +105,11 @@ export default function UploadPage({ params }: PageProps) {
   };
 
   const handleCompleteUpload = async () => {
+    if (!isLoggedIn || !user) {
+      setMessage("로그인 후 업로드할 수 있습니다.");
+      return;
+    }
+
     if (!fanUploadId) {
       setMessage("먼저 업로드 세션을 생성해 주세요.");
       return;
@@ -93,7 +119,8 @@ export default function UploadPage({ params }: PageProps) {
       setIsCompleting(true);
       setMessage("");
 
-      const result = await completeFanUpload(projectId, fanUploadId, userId);
+      const result = await completeFanUpload(projectId, fanUploadId, user.id);
+
       setMessage(
         `업로드 완료 처리되었습니다. 현재 상태: ${result.status}, 총 파일 수: ${result.totalFileCount}`
       );
@@ -104,6 +131,26 @@ export default function UploadPage({ params }: PageProps) {
       setIsCompleting(false);
     }
   };
+
+  if (!isLoggedIn || !user) {
+    return (
+      <main className="mx-auto max-w-4xl px-6 py-16">
+        <div className="rounded-[2rem] border border-slate-200 bg-white p-10 text-center shadow-sm">
+          <h1 className="text-2xl font-bold">로그인이 필요합니다.</h1>
+          <p className="mt-3 text-sm text-slate-500">
+            사진 업로드는 로그인 후 진행할 수 있습니다.
+          </p>
+
+          <Link
+            href={`/projects/${projectId}`}
+            className="mt-6 inline-flex rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold transition hover:bg-slate-50"
+          >
+            프로젝트로 돌아가기
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-16">
@@ -119,6 +166,9 @@ export default function UploadPage({ params }: PageProps) {
             프로젝트에 참여할 사진을 업로드하세요. 지금은 세션 생성 → 파일 업로드 → 완료 처리
             흐름으로 진행됩니다.
           </p>
+          <p className="mt-2 text-sm text-slate-500">
+            현재 사용자: {user.nickname} ({user.role})
+          </p>
         </div>
 
         <Link
@@ -130,7 +180,6 @@ export default function UploadPage({ params }: PageProps) {
       </div>
 
       <section className="mt-10 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-        {/* 왼쪽: 업로드 설정 */}
         <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-bold">업로드 정보</h2>
 
@@ -195,13 +244,13 @@ export default function UploadPage({ params }: PageProps) {
                 {fanUploadId ?? "아직 없음"}
               </span>
             </p>
+
             {message && (
               <p className="mt-2 font-medium text-slate-900">{message}</p>
             )}
           </div>
         </div>
 
-        {/* 오른쪽: 미리보기 */}
         <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-bold">선택한 이미지 미리보기</h2>
 

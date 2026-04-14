@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getProjectDetail } from "@/features/project/api/getProjectDetail";
 import { getProjectPhaseLabel } from "@/features/project/utils/projectPhase";
+import ProjectCuratedPreviewSection from "@/features/project/components/ProjectCuratedPreviewSection";
 
 type PageProps = {
   params: {
@@ -108,6 +109,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                 <li>• 주문 단계에서는 실제 포토북 주문이 가능합니다.</li>
               </ul>
             </div>
+            <ProjectCuratedPreviewSection projectId={project.id} />
           </article>
 
           <aside className="rounded-[2rem] border border-slate-200 p-8">

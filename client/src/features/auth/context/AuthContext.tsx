@@ -8,25 +8,43 @@ import {
   useState,
 } from "react";
 
-type MockUser = {
+export type UserRole = "ADMIN" | "USER" | "CURATOR";
+
+export type MockUser = {
   id: number;
   nickname: string;
   email: string;
+  role: UserRole;
 };
 
 type AuthContextType = {
   isLoggedIn: boolean;
   user: MockUser | null;
-  login: () => void;
+  loginAs: (role: UserRole) => void;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const MOCK_USER: MockUser = {
-  id: 1,
-  nickname: "admin",
-  email: "admin@sweet-hjr.com",
+const MOCK_USERS: Record<UserRole, MockUser> = {
+  ADMIN: {
+    id: 1,
+    nickname: "admin",
+    email: "admin@sweet-hjr.com",
+    role: "ADMIN",
+  },
+  USER: {
+    id: 2,
+    nickname: "fan_user",
+    email: "user@sweet-hjr.com",
+    role: "USER",
+  },
+  CURATOR: {
+    id: 3,
+    nickname: "curator",
+    email: "curator@sweet-hjr.com",
+    role: "CURATOR",
+  },
 };
 
 const STORAGE_KEY = "fanbook_mock_auth";
@@ -36,18 +54,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
+    const savedRole = window.localStorage.getItem(STORAGE_KEY) as UserRole | null;
 
-    if (saved === "logged_in") {
-      setUser(MOCK_USER);
+    if (savedRole && MOCK_USERS[savedRole]) {
+      setUser(MOCK_USERS[savedRole]);
     }
 
     setIsReady(true);
   }, []);
 
-  const login = () => {
-    window.localStorage.setItem(STORAGE_KEY, "logged_in");
-    setUser(MOCK_USER);
+  const loginAs = (role: UserRole) => {
+    window.localStorage.setItem(STORAGE_KEY, role);
+    setUser(MOCK_USERS[role]);
   };
 
   const logout = () => {
@@ -59,13 +77,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       isLoggedIn: !!user,
       user,
-      login,
+      loginAs,
       logout,
     }),
     [user]
   );
 
-  // hydration mismatch 방지
   if (!isReady) {
     return null;
   }

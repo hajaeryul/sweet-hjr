@@ -35,6 +35,8 @@ public class UploadService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final ImageAnalysisService imageAnalysisService;
+    private final ImageGroupingService imageGroupingService;
 
     public CreateFanUploadResponse createFanUpload(Long projectId, CreateFanUploadRequest request) {
         Project project = getProject(projectId);
@@ -99,15 +101,17 @@ public class UploadService {
 
             FanUploadFile savedFile = fanUploadFileRepository.save(fanUploadFile);
 
-            uploadedFiles.add(UploadedFileItemResponse.builder()
-                    .fileId(savedFile.getId())
-                    .originalFileName(savedFile.getOriginalFileName())
-                    .fileUrl(savedFile.getFileUrl())
-                    .mimeType(savedFile.getMimeType())
-                    .fileSize(savedFile.getFileSize())
-                    .width(savedFile.getWidth())
-                    .height(savedFile.getHeight())
-                    .build());
+            uploadedFiles.add(
+                    UploadedFileItemResponse.builder()
+                            .fileId(savedFile.getId())
+                            .originalFileName(savedFile.getOriginalFileName())
+                            .fileUrl(savedFile.getFileUrl())
+                            .mimeType(savedFile.getMimeType())
+                            .fileSize(savedFile.getFileSize())
+                            .width(savedFile.getWidth())
+                            .height(savedFile.getHeight())
+                            .build()
+            );
         }
 
         return UploadFilesResponse.builder()
@@ -123,19 +127,30 @@ public class UploadService {
             CompleteFanUploadRequest request
     ) {
         FanUpload fanUpload = fanUploadRepository.findByIdAndProjectIdAndUserId(
-                        fanUploadId, projectId, request.getUserId())
+                        fanUploadId,
+                        projectId,
+                        request.getUserId()
+                )
                 .orElseThrow(() -> new EntityNotFoundException("업로드 세션을 찾을 수 없습니다."));
 
-        long totalFileCount = fanUploadFileRepository.countByFanUploadId(fanUploadId);
-        if (totalFileCount == 0) {
+        List<FanUploadFile> uploadFiles = fanUploadFileRepository.findAllByFanUploadId(fanUploadId);
+
+        if (uploadFiles.isEmpty()) {
             throw new IllegalStateException("업로드된 파일이 없어 완료 처리할 수 없습니다.");
         }
 
-        // 현재 enum 구조상 업로드 완료 후에도 PENDING 유지
+        for (FanUploadFile file : uploadFiles) {
+            imageAnalysisService.analyze(file);
+        }
+
+        imageGroupingService.regroupProject(projectId);
+
+        fanUpload.changeStatus(UploadStatus.FILTERED);
+
         return CompleteFanUploadResponse.builder()
                 .fanUploadId(fanUpload.getId())
                 .status(fanUpload.getStatus().name())
-                .totalFileCount(totalFileCount)
+                .totalFileCount(uploadFiles.size())
                 .build();
     }
 
@@ -187,7 +202,6 @@ public class UploadService {
         getUser(userId);
 
         List<FanUpload> fanUploads = fanUploadRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
-
         if (fanUploads.isEmpty()) {
             return List.of();
         }
@@ -196,8 +210,7 @@ public class UploadService {
                 .map(FanUpload::getId)
                 .toList();
 
-        List<FanUploadFile> allFiles = fanUploadFileRepository
-                .findAllByFanUploadIdInOrderByUploadedAtDesc(fanUploadIds);
+        List<FanUploadFile> allFiles = fanUploadFileRepository.findAllByFanUploadIdInOrderByUploadedAtDesc(fanUploadIds);
 
         Map<Long, List<MyUploadFileResponse>> fileMap = allFiles.stream()
                 .collect(Collectors.groupingBy(
@@ -228,6 +241,4 @@ public class UploadService {
                         .build())
                 .toList();
     }
-
-
 }

@@ -6,10 +6,10 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 
 export default function Header() {
   const router = useRouter();
-  const { isLoggedIn, user, login, logout } = useAuth();
+  const { isLoggedIn, user, loginAs, logout } = useAuth();
 
-  const handleLogin = () => {
-    login();
+  const handleMockLogin = (role: "ADMIN" | "USER" | "CURATOR") => {
+    loginAs(role);
     router.refresh();
   };
 
@@ -50,7 +50,7 @@ export default function Header() {
           {isLoggedIn ? (
             <>
               <div className="hidden text-sm text-slate-500 md:block">
-                {user?.nickname}님
+                {user?.nickname} ({user?.role})
               </div>
 
               <Link
@@ -68,12 +68,28 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <button
-              onClick={handleLogin}
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
-            >
-              로그인
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleMockLogin("ADMIN")}
+                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+              >
+                관리자 로그인
+              </button>
+
+              <button
+                onClick={() => handleMockLogin("USER")}
+                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-50"
+              >
+                유저 로그인
+              </button>
+
+              <button
+                onClick={() => handleMockLogin("CURATOR")}
+                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-50"
+              >
+                큐레이터 로그인
+              </button>
+            </div>
           )}
         </div>
       </div>
