@@ -23,6 +23,10 @@ export default function ProjectCuratedPreviewSection({ projectId }: Props) {
     return user.role === "ADMIN" || user.role === "CURATOR";
   }, [isLoggedIn, user]);
 
+  const previewImages = [...images]
+  .sort((a, b) => a.priorityOrder - b.priorityOrder)
+  .slice(0, 12);
+
   useEffect(() => {
     const fetchCuratedImages = async () => {
       try {
@@ -95,7 +99,7 @@ export default function ProjectCuratedPreviewSection({ projectId }: Props) {
         </div>
       ) : (
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {images.map((image) => (
+          {previewImages.map((image) => (
             <article
               key={image.curatedImageId}
               className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-sm"

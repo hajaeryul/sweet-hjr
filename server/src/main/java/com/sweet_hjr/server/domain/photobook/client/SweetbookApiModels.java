@@ -141,4 +141,96 @@ public class SweetbookApiModels {
         private Integer pageCount;
         private String finalizedAt;
     }
+
+    // order
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class OrderItemRequest {
+        private String bookUid;
+        private Integer quantity;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class OrderShippingRequest {
+        private String recipientName;
+        private String recipientPhone;
+        private String postalCode;
+        private String address1;
+        private String address2;
+        private String memo;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class OrderEstimateRequest {
+        private List<OrderItemRequest> items;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class OrderCreateRequest {
+        private List<OrderItemRequest> items;
+        private OrderShippingRequest shipping;
+        private String externalRef;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class OrderEstimateData {
+        private java.math.BigDecimal totalProductAmount;
+        private java.math.BigDecimal totalShippingFee;
+        private java.math.BigDecimal totalPackagingFee;
+        private java.math.BigDecimal totalAmount;
+        private java.math.BigDecimal paidCreditAmount;
+        private java.math.BigDecimal creditBalance;
+        private Boolean creditSufficient;
+        private String currency;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class OrderItemData {
+        private String itemUid;
+        private String bookUid;
+        private String bookTitle;
+        private String bookSpecUid;
+        private String bookSpecName;
+        private Integer quantity;
+        private Integer pageCount;
+        private java.math.BigDecimal unitPrice;
+        private java.math.BigDecimal itemAmount;
+        private Integer itemStatus;
+        private String itemStatusDisplay;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class OrderCreateData {
+        private String orderUid;
+        private Integer orderStatus;
+        private String orderStatusDisplay;
+        private Boolean isTest;
+        private java.math.BigDecimal totalProductAmount;
+        private java.math.BigDecimal totalShippingFee;
+        private java.math.BigDecimal totalPackagingFee;
+        private java.math.BigDecimal totalAmount;
+        private java.math.BigDecimal paidCreditAmount;
+        private java.math.BigDecimal creditBalanceAfter;
+        private String recipientName;
+        private String recipientPhone;
+        private String postalCode;
+        private String address1;
+        private String address2;
+        private String shippingMemo;
+        private String orderedAt;
+        private List<OrderItemData> items;
+    }
 }

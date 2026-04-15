@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getProjectDetail } from "@/features/project/api/getProjectDetail";
 import { getProjectPhaseLabel } from "@/features/project/utils/projectPhase";
 import ProjectCuratedPreviewSection from "@/features/project/components/ProjectCuratedPreviewSection";
+import PhotobookOrderSection from "@/features/photobook/components/PhotobookOrderSection";
 
 type PageProps = {
   params: {
@@ -51,9 +52,9 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               )}
 
               {project.projectPhase === "ORDER_OPEN" && (
-                <button className="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-700">
+                <a href="#photobook-order" className="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-700">
                   포토북 주문하기
-                </button>
+                </a>
               )}
 
               {project.projectPhase === "BEFORE_UPLOAD" && (
@@ -161,6 +162,14 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                 {project.createdByNickname}
               </p>
             </div>
+            {/* <ProjectCuratedPreviewSection projectId={project.id} /> */}
+
+      <div className="mt-5" id="photobook-order">
+        <PhotobookOrderSection
+          projectId={project.id}
+          orderAvailable={project.orderAvailable}
+        />
+      </div>
           </aside>
         </div>
       </section>

@@ -255,4 +255,39 @@ public class SweetbookClient {
             throw new IllegalStateException("parameters JSON 변환에 실패했습니다.", e);
         }
     }
+
+    public OrderEstimateData estimateOrder(OrderEstimateRequest request) {
+        SweetbookEnvelope<OrderEstimateData> response = sweetbookRestClient.post()
+                .uri("/orders/estimate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+
+        validateResponse(response);
+
+        if (response.getData() == null) {
+            throw new IllegalStateException("주문 견적 응답 데이터가 비어 있습니다.");
+        }
+
+        return response.getData();
+    }
+
+    public OrderCreateData createOrder(OrderCreateRequest request, String idempotencyKey) {
+        SweetbookEnvelope<OrderCreateData> response = sweetbookRestClient.post()
+                .uri("/orders")
+                .header("Idempotency-Key", idempotencyKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+
+        validateResponse(response);
+
+        if (response.getData() == null) {
+            throw new IllegalStateException("주문 생성 응답 데이터가 비어 있습니다.");
+        }
+
+        return response.getData();
+    }
 }
