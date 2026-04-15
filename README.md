@@ -68,6 +68,80 @@ http://localhost:3000
 - MySQL 실행 상태 필요
 - 서버(8080) → 클라이언트(3000) 연결됨
 
+## MYSQL 데이터베이스 생성
+로컬 MYSQL에서 아래 명령으로 DB를 생성
+```SQL
+CREATE DATABASE sweet_hjr CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+최초 백엔드 실행 시 JPA가 테이블을 생성합니다
+
+### 필수 초기 데이터 삽입(MySQL)
+#### 1) 사용자 데이터 삽입
+예시:
+```SQL
+INSERT INTO users (email, password_hash, nickname, status, created_at, updated_at)
+VALUES ('admin@test.com', 'test-hash', '관리자', 'ACTIVE', NOW(), NOW());
+
+INSERT INTO users (email, password_hash, nickname, status, created_at, updated_at)
+VALUES ('user@test.com', 'test-hash', '유저', 'ACTIVE', NOW(), NOW());
+
+INSERT INTO users (email, password_hash, nickname, status, created_at, updated_at)
+VALUES ('curator@test.com', 'test-hash', '큐레이터', 'ACTIVE', NOW(), NOW());
+```
+
+#### 2) Role 데이터 삽입
+```SQL
+INSERT INTO user_roles (created_at, role_type, user_id)
+VALUES (NOW(), 'ADMIN', 1);
+
+INSERT INTO user_roles (created_at, role_type, user_id)
+VALUES (NOW(), 'USER', 2);
+
+INSERT INTO user_roles (created_at, role_type, user_id)
+VALUES (NOW(), 'CURATOR', 3);
+```
+
+#### 3) 인플루언서 데이터 삽입
+예시:
+```SQL
+INSERT INTO influencers (id, name, display_name, category, profile_image_url, status, created_at, updated_at)
+VALUES
+(1, 'FAKER', '페이커', 'SPORTS_STAR', 'https://test.jpg', 'ACTIVE', NOW(), NOW());
+```
+
+#### 4) 프로젝트 데이터 삽입
+프로젝트를 생성한 사용자는 관리자 계정으로 가정합니다.
+예시:
+```SQL
+INSERT INTO projects (
+    id, influencer_id, created_by, title, description, cover_image_url, status,
+    upload_start_at, upload_end_at,
+    preview_start_at, preview_end_at,
+    order_start_at, order_end_at,
+    created_at, updated_at
+) VALUES (
+    1, 1, 1,
+    '페이커 포토북 굿즈',
+    '리그오브레전드의 전설 T1 페이커의 팬 참여형 포토북 프로젝트',
+    'https://i.namu.wiki/i/0mzaGn7CkphuIcQJ-fR40ZY_MGz6TeW2tWvMiHv_OGSpQFhd8T7TbwIfVaiKZYTeBrhClmiFOdKG_PxTvur6wXEGIBDHtL76ykNx_vt2FK2Zu5ctyZn6xbDnCJwpB0mC3QB0leZrGAwh1PBuEB7s3Q.webp',
+    'COLLECTING',
+    '2026-04-10 00:00:00', '2026-04-20 23:59:59',
+    '2026-04-21 00:00:00', '2026-04-27 23:59:59',
+    '2026-04-28 00:00:00', '2026-05-05 23:59:59',
+    NOW(), NOW()
+);
+```
+
+#### 5) 주문 테스트를 위한 프로젝트 기간 조정
+주문 기능을 테스트하려면 주문 기간이 현재 시각 기준으로 열려 있어야 합니다.
+```SQL
+UPDATE project
+SET
+    order_start_at = NOW() - INTERVAL 1 DAY,
+    order_end_at = NOW() + INTERVAL 7 DAY
+WHERE id = 1;
+```
+
 ## 3. 사용한 API 목록
 | API                                | 용도        |
 | ---------------------------------- | --------- |
