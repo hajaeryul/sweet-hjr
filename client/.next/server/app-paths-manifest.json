@@ -1,7 +1,9 @@
 {
+  "/projects/[projectId]/page": "app/projects/[projectId]/page.js",
+  "/my/uploads/page": "app/my/uploads/page.js",
   "/page": "app/page.js",
-  "/admin/projects/[projectId]/photobook/page": "app/admin/projects/[projectId]/photobook/page.js",
-  "/admin/projects/page": "app/admin/projects/page.js",
   "/projects/page": "app/projects/page.js",
-  "/projects/[projectId]/page": "app/projects/[projectId]/page.js"
+  "/admin/projects/page": "app/admin/projects/page.js",
+  "/curation/projects/[projectId]/page": "app/curation/projects/[projectId]/page.js",
+  "/admin/projects/[projectId]/photobook/page": "app/admin/projects/[projectId]/photobook/page.js"
 }

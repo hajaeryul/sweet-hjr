@@ -5,6 +5,9 @@ spring:
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  profiles:
+    active: local,secret
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -29,9 +32,9 @@ app:
   upload:
     base-dir: C:/jaeryul/sweet-hjr/bookprintapi-nodejs-sdk/server/uploads
 
-sweetbook:
-  base-url: https://api-sandbox.sweetbook.com/v1
-  api-key: "SBOCDAPTS9O7.6MzuQNHbk4Z_do8wfjIE1RYAYAniPQfE"
+#sweetbook:
+#  base-url: https://api-sandbox.sweetbook.com/v1
+#  api-key: ${SWEETBOOK_API_KEY}
 
 server:
   port: 8080
