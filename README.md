@@ -1,151 +1,106 @@
-# bookprintapi-nodejs-sdk
+## 1. 서비스 소개
+### 📌 한 줄 소개
+팬이 직접 참여해 사진을 업로드하고, 큐레이션을 통해 포토북을 제작 및 주문 할 수 있는 플랫폼
 
-Sweetbook API를 Node.js에서 사용하기 위한 SDK입니다.
+## 🎯 타겟 고객
+- 인플루언서 / 유튜버 / 크리에이터 / 스포츠 스타 등
+- 해당 팬과 팬 커뮤니티 유저
+- 굿즈 제작 및 팬 참여형 콘텐츠를 만들고 싶은 크리에이터
 
-## 빠른 시작
+## ✨ 주요 기능
+- 프로젝트 생성(인플루언서 기반)
+- 팬 사진 업로드
+- AI 기반 이미지 분석(품질/노이즈/텍스트 등)
+- 유사 이미지 그룹핑 및 대표 이미지 선정
+- 큐레이터 이미지 선정(인플루언서에게 수령한 희소성 있는 고화질 사진 포함)
+  (아래부터는 BookPrint API 연동)
+- 포토북 자동 생성
+- 포토북 미리보기
+- 포토북 주문 및 견적 확인
 
+## 2. 실행 방법
+### 📁 프로젝트 클론
+```Bash
+git clone https://github.com/hajaeryul/sweet-hjr.git
+cd sweet-hjr
+```
+
+## 🛠 백엔드 실행 (Spring Boot)
+### 1. DB 준비 (MySQL)
+```SQL
+CREATE DATABASE sweet_hjr;
+```
+
+### 2. 환경 설정 파일 생성
+```Bash
+cp server/src/main/resources/application-secret.yml.example server/src/main/resources/application-secret.yml
+```
+### 3. application-secret.yml 수정
+```yaml
+sweetbook:
+  base-url: https://api-sandbox.sweetbook.com/v1
+  api-key: YOUR_API_KEY_HERE
+```
+
+### 4. 서버 실행
+```Bash
+cd server
+./mvnw spring-boot:run
+```
+또는 IntelliJ에서 실행
+
+## 💻 프론트엔드 실행 (Next.js)
+### 1. 의존성 설치
 ```bash
+cd client
 npm install
-cp .env.example .env   # API Key 편집
 ```
-
-```javascript
-const { SweetbookClient } = require('bookprintapi-nodejs-sdk');
-
-const client = new SweetbookClient({
-  apiKey: 'SB_YOUR_API_KEY',
-  environment: 'sandbox',  // 'sandbox' | 'live'
-});
-
-// 책 생성
-const book = await client.books.create({
-  bookSpecUid: 'SQUAREBOOK_HC',
-  title: '내 포토북',
-  creationType: 'TEST',
-});
-console.log('bookUid:', book.bookUid);
-```
-
-> Node.js 18 이상 필요 (내장 `fetch` 사용)
-
-## SDK 구조
-
-```
-lib/
-├── core.js      # 에러 클래스, ResponseParser, BaseClient (HTTP, 재시도, 타임아웃)
-├── client.js    # SweetbookClient + 리소스별 클라이언트
-└── webhook.js   # 웹훅 서명 검증 유틸
-index.js         # 진입점
-```
-
-## 리소스
-
-| 리소스 | 메서드 | 설명 |
-|--------|--------|------|
-| `client.books` | `list`, `create`, `get`, `finalize`, `delete` | 책 관리 |
-| `client.photos` | `upload`, `list`, `delete` | 사진 업로드/관리 |
-| `client.covers` | `create`, `get`, `delete` | 표지 |
-| `client.contents` | `insert`, `clear` | 내지 페이지 |
-| `client.orders` | `estimate`, `create`, `list`, `get`, `cancel`, `updateShipping` | 주문 |
-| `client.credits` | `getBalance`, `transactions`, `sandboxCharge` | 충전금 |
-
-## 예제
-
-### 1. 책 생성 → 표지 → 내지 → 최종화
-
+### 2. 실행
 ```bash
-node examples/01_create_book.js
+npm run dev
 ```
-
-### 2. 충전금 확인 → 견적 → 주문
-
-```bash
-node examples/02_order.js
+### 🌐 접속
 ```
-
-### 3. 웹훅 수신 서버
-
-```bash
-node examples/03_webhook_server.js
+http://localhost:3000
 ```
+#### ⚠️ 주의사항
+- BookPrint API Key 필요
+- MySQL 실행 상태 필요
+- 서버(8080) → 클라이언트(3000) 연결됨
 
-## 환경 설정
+## 3. 사용한 API 목록
+| API                                | 용도        |
+| ---------------------------------- | --------- |
+| POST /books                        | 포토북 생성    |
+| GET /templates                     | 템플릿 목록 조회 |
+| POST /books/{bookUid}/cover        | 표지 생성     |
+| POST /books/{bookUid}/contents     | 내지 생성     |
+| POST /books/{bookUid}/finalization | 포토북 최종화   |
+| POST /orders/estimate              | 주문 견적 조회  |
+| POST /orders                       | 포토북 주문 생성 |
 
-`.env` 파일 또는 환경변수로 설정:
+## 4. AI 도구 사용 내역
+| AI 도구   | 활용 내용                  |
+| ------- | ---------------------- |
+| ChatGPT | DB설계 및 구조 개선         |
+| ChatGPT | 백엔드 API 설계 및 구조 개선     |
+| ChatGPT | 프론트 UI 및 상태 흐름 설계      |
+| ChatGPT | BookPrint API 연동 구조 설계 |
+| ChatGPT | 이미지 큐레이션 로직 개선         |
 
-| 변수 | 설명 | 기본값 |
-|------|------|--------|
-| `SWEETBOOK_API_KEY` | API 키 | (필수) |
-| `SWEETBOOK_ENV` | `sandbox` 또는 `live` | `live` |
-| `SWEETBOOK_WEBHOOK_SECRET` | 웹훅 시크릿 | (선택) |
+## 5. 설계 의도
+### 📌 서비스 선택 이유
 
-## SDK 옵션
+단순한 포토북 제작이 아니라
+<b>팬 참여형 콘텐츠 제작 경험</b>을 제공하는 서비스에 집중하였다.
 
-```javascript
-const client = new SweetbookClient({
-  apiKey: 'SB...',           // 필수
-  environment: 'sandbox',    // 'sandbox' | 'live' (기본: 'live')
-  baseUrl: 'https://...',    // 직접 지정 (environment 대신)
-  timeout: 30000,            // 요청 타임아웃 ms (기본: 30초)
-});
-```
-
-## 에러 처리
-
-```javascript
-const { SweetbookApiError, SweetbookNetworkError } = require('bookprintapi-nodejs-sdk');
-
-try {
-  await client.books.get('invalid-uid');
-} catch (err) {
-  if (err instanceof SweetbookApiError) {
-    console.log('API 에러:', err.statusCode, err.message);
-    console.log('상세:', err.details);
-  } else if (err instanceof SweetbookNetworkError) {
-    console.log('네트워크 에러:', err.message);
-  }
-}
-```
-
-## 웹훅 서명 검증
-
-```javascript
-const { verifySignature } = require('bookprintapi-nodejs-sdk');
-
-// Express 예시
-app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
-  const payload = req.body.toString();
-  const signature = req.headers['x-sweetbook-signature'];
-  const timestamp = req.headers['x-sweetbook-timestamp'];
-
-  if (!verifySignature(payload, signature, WEBHOOK_SECRET, timestamp)) {
-    return res.status(401).send('Invalid signature');
-  }
-
-  const event = JSON.parse(payload);
-  // 이벤트 처리...
-  res.json({ received: true });
-});
-```
-
-## 자동 재시도
-
-429 (Rate Limit) 및 5xx 에러 시 지수 백오프로 최대 2회 재시도합니다.
-
-| 시도 | 대기 시간 |
-|------|----------|
-| 1차 재시도 | 1초 |
-| 2차 재시도 | 2초 |
-
-## 커스터마이징
-
-| 파일 | 수정 내용 |
-|------|----------|
-| `lib/client.js` | 리소스 클라이언트 추가/수정 |
-| `lib/core.js` | HTTP 클라이언트 동작 변경 (재시도, 타임아웃 등) |
-| `lib/webhook.js` | 서명 검증 로직 수정 |
-| `examples/` | 자신의 템플릿 UID와 데이터로 예제 수정 |
-
-## 라이선스
-
-MIT
+### 💡 비즈니스 가능성
+- 팬덤 기반 굿즈 시장과 결합 가능
+- 인플루언서 커뮤니티 확장 가능
+- 사용자 참여형 콘텐츠 플랫폼으로 발전 가능
+ 
+### 🚀 추가로 구현하고 싶었던 기능
+- UI/UX
+- AI 기반 자동 레이아웃 구성
+- 주문 내역 관리 (마이페이지)
+- 웹훅 기반 주문 상태 동기화
