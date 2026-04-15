@@ -35,7 +35,7 @@ CREATE DATABASE sweet_hjr;
 ```Bash
 cp server/src/main/resources/application-secret.yml.example server/src/main/resources/application-secret.yml
 ```
-### 3. application-secret.yml 수정
+### 3. application-secret.yml 생성
 ```yaml
 sweetbook:
   base-url: https://api-sandbox.sweetbook.com/v1
